@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🖥 Mac 제어판</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #1a1a2e;
+    --card2: #16213e;
+    --accent: #0f3460;
+    --blue: #4facfe;
+    --purple: #a855f7;
+    --green: #22d3ee;
+    --red: #f87171;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --sub: #94a3b8;
+    --border: #2d3748;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ── 헤더 ── */
+  .header {
+    background: linear-gradient(135deg, #0f3460, #1a1a2e);
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .status-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--red);
+    margin-right: 6px; transition: background 0.3s;
+  }
+  .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  /* ── 설정 모달 ── */
+  .setup-banner {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border: 1px solid #4f46e5;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin: 16px;
+    text-align: center;
+  }
+  .setup-banner h2 { font-size: 16px; margin-bottom: 8px; }
+  .setup-banner input {
+    width: 100%; padding: 10px 14px;
+    background: #0a0a0f; border: 1px solid #4f46e5;
+    border-radius: 10px; color: var(--text); font-size: 14px;
+    margin: 4px 0;
+  }
+  .setup-banner input::placeholder { color: var(--sub); }
+
+  /* ── 메인 콘텐츠 ── */
+  .content { padding: 12px 16px 40px; }
+  .section-title {
+    font-size: 11px; font-weight: 600; color: var(--sub);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin: 20px 0 10px;
+  }
+
+  /* ── 카드 ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 13px; color: var(--sub); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── 버튼 그리드 ── */
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .btn-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+  .btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .btn:active { transform: scale(0.95); opacity: 0.8; }
+  .btn .icon { font-size: 24px; }
+  .btn.blue { border-color: #4facfe44; }
+  .btn.blue:active { background: #4facfe22; }
+  .btn.green { border-color: #22d3ee44; }
+  .btn.green:active { background: #22d3ee22; }
+  .btn.red { border-color: #f8717144; }
+  .btn.red:active { background: #f8717122; }
+  .btn.orange { border-color: #fb923c44; }
+  .btn.orange:active { background: #fb923c22; }
+  .btn.purple { border-color: #a855f744; }
+  .btn.purple:active { background: #a855f722; }
+
+  /* ── 볼륨 ── */
+  .volume-wrap { display: flex; align-items: center; gap: 12px; }
+  .volume-wrap span { font-size: 20px; }
+  input[type=range] {
+    flex: 1; height: 6px; -webkit-appearance: none;
+    background: var(--border); border-radius: 3px; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px;
+    border-radius: 50%; background: var(--blue); cursor: pointer;
+    box-shadow: 0 0 8px #4facfe66;
+  }
+  .volume-label { font-size: 16px; font-weight: 700; min-width: 38px; text-align: center; }
+
+  /* ── 텍스트 입력 ── */
+  .text-input {
+    width: 100%; padding: 12px 14px;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); font-size: 15px;
+    margin-bottom: 8px; outline: none;
+  }
+  .text-input:focus { border-color: var(--blue); }
+  .text-input::placeholder { color: var(--sub); }
+
+  /* ── 시스템 정보 ── */
+  .sys-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .sys-item {
+    background: var(--card2); border-radius: 12px;
+    padding: 12px; border: 1px solid var(--border);
+  }
+  .sys-item .label { font-size: 10px; color: var(--sub); margin-bottom: 4px; }
+  .sys-item .value { font-size: 14px; font-weight: 600; }
+
+  /* ── 토스트 ── */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #1e293b; border: 1px solid var(--border);
+    border-radius: 20px; padding: 10px 20px;
+    font-size: 14px; z-index: 999;
+    opacity: 0; transition: opacity 0.3s;
+    white-space: nowrap; max-width: 90vw;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── 스크린샷 ── */
+  #screenshot-img {
+    width: 100%; border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-top: 10px; display: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <h1>🖥 Mac 제어판</h1>
+  <p><span class="status-dot" id="dot"></span><span id="status-text">서버 연결 확인 중...</span></p>
+</div>
+
+<!-- 설정 배너 -->
+<div class="setup-banner" id="setup-banner">
+  <h2>⚙️ 서버 연결 설정</h2>
+  <input type="url" id="server-url" placeholder="서버 주소 (예: http://100.78.249.68:5001)" value="http://100.78.249.68:5001">
+  <input type="password" id="auth-token" placeholder="인증 토큰" value="">
+  <button class="btn" style="width:100%;margin-top:8px;padding:12px;font-size:14px;" onclick="saveSettings()">💾 저장 & 연결</button>
+</div>
+
+<!-- 메인 콘텐츠 -->
+<div class="content">
+
+  <!-- 볼륨 -->
+  <p class="section-title">🔊 볼륨</p>
+  <div class="card">
+    <div class="volume-wrap">
+      <span>🔇</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="50" oninput="onVolumeChange(this.value)">
+      <span>🔊</span>
+      <div class="volume-label" id="vol-label">50</div>
+    </div>
+    <div class="btn-grid btn-grid-2" style="margin-top:12px;">
+      <button class="btn orange" onclick="api('POST','/api/mute')"><span class="icon">🔇</span>음소거</button>
+      <button class="btn green" onclick="api('POST','/api/unmute')"><span class="icon">🔊</span>해제</button>
+    </div>
+  </div>
+
+  <!-- 앱 실행 -->
+  <p class="section-title">📱 앱 실행</p>
+  <div class="card">
+    <div class="btn-grid">
+      <button class="btn blue" onclick="openApp('Safari')"><span class="icon">🌐</span>Safari</button>
+      <button class="btn blue" onclick="openApp('Finder')"><span class="icon">📁</span>Finder</button>
+      <button class="btn blue" onclick="openApp('Terminal')"><span class="icon">💻</span>Terminal</button>
+      <button class="btn purple" onclick="openApp('Visual Studio Code')"><span class="icon">⌨️</span>VSCode</button>
+      <button class="btn blue" onclick="openApp('Google Chrome')"><span class="icon">🌍</span>Chrome</button>
+      <button class="btn orange" onclick="openApp('Music')"><span class="icon">🎵</span>Music</button>
+    </div>
+  </div>
+
+  <!-- 알림 & TTS -->
+  <p class="section-title">🔔 알림 & 음성</p>
+  <div class="card">
+    <input class="text-input" id="notify-msg" placeholder="알림 내용">
+    <button class="btn blue" style="width:100%;padding:12px;" onclick="sendNotify()">
+      <span style="font-size:18px;">🔔</span> 맥에 알림 보내기
+    </button>
+    <div style="margin-top:12px;">
+      <input class="text-input" id="tts-text" placeholder="읽어줄 텍스트">
+      <button class="btn purple" style="width:100%;padding:12px;" onclick="speak()">
+        <span style="font-size:18px;">🗣</span> 텍스트 읽기 (TTS)
+      </button>
+    </div>
+  </div>
+
+  <!-- URL 열기 -->
+  <p class="section-title">🌐 URL 열기</p>
+  <div class="card">
+    <input class="text-input" id="url-input" placeholder="https://...">
+    <button class="btn green" style="width:100%;padding:12px;" onclick="openUrl()">
+      <span style="font-size:18px;">🌐</span> 브라우저로 열기
+    </button>
+  </div>
+
+  <!-- 시스템 정보 -->
+  <p class="section-title">💻 시스템 정보</p>
+  <div class="card">
+    <div class="sys-grid" id="sys-grid">
+      <div class="sys-item"><div class="label">🔋 배터리</div><div class="value" id="sys-battery">-</div></div>
+      <div class="sys-item"><div class="label">💾 디스크</div><div class="value" id="sys-disk">-</div></div>
+      <div class="sys-item"><div class="label">🧠 메모리</div><div class="value" id="sys-mem">-</div></div>
+      <div class="sys-item"><div class="label">⏱ 업타임</div><div class="value" id="sys-uptime">-</div></div>
+    </div>
+    <button class="btn green" style="width:100%;padding:12px;margin-top:12px;" onclick="loadSystem()">
+      <span style="font-size:18px;">🔄</span> 새로고침
+    </button>
+  </div>
+
+  <!-- 스크린샷 -->
+  <p class="section-title">📸 스크린샷</p>
+  <div class="card">
+    <button class="btn blue" style="width:100%;padding:12px;" onclick="takeScreenshot()">
+      <span style="font-size:18px;">📸</span> 맥 화면 캡처
+    </button>
+    <img id="screenshot-img" alt="스크린샷">
+  </div>
+
+  <!-- 전원 -->
+  <p class="section-title">⚡ 전원</p>
+  <div class="card">
+    <div class="btn-grid btn-grid-2">
+      <button class="btn red" onclick="confirmAction('sleep')"><span class="icon">😴</span>잠자기</button>
+      <button class="btn orange" onclick="confirmAction('restart')"><span class="icon">🔄</span>재시작</button>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+let SERVER_URL = localStorage.getItem('server_url') || 'http://100.78.249.68:5001';
+let TOKEN = localStorage.getItem('auth_token') || '';
+
+// 초기화
+window.onload = () => {
+  document.getElementById('server-url').value = SERVER_URL;
+  document.getElementById('auth-token').value = TOKEN;
+  if (SERVER_URL && TOKEN) {
+    document.getElementById('setup-banner').style.display = 'none';
+    checkConnection();
+    loadSystem();
+  }
+};
+
+function saveSettings() {
+  SERVER_URL = document.getElementById('server-url').value.trim().replace(/\/$/, '');
+  TOKEN = document.getElementById('auth-token').value.trim();
+  localStorage.setItem('server_url', SERVER_URL);
+  localStorage.setItem('auth_token', TOKEN);
+  document.getElementById('setup-banner').style.display = 'none';
+  checkConnection();
+  loadSystem();
+  toast('✅ 설정 저장됨');
+}
+
+async function api(method, path, body) {
+  try {
+    const opts = {
+      method,
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(SERVER_URL + path, opts);
+    if (path === '/api/screenshot') return res;
+    return await res.json();
+  } catch (e) {
+    toast('❌ 서버 연결 실패');
+    updateStatus(false);
+    return null;
+  }
+}
+
+async function checkConnection() {
+  try {
+    const res = await fetch(SERVER_URL + '/health');
+    const data = await res.json();
+    updateStatus(data.status === 'ok');
+  } catch {
+    updateStatus(false);
+  }
+}
+
+function updateStatus(ok) {
+  document.getElementById('dot').className = 'status-dot' + (ok ? ' connected' : '');
+  document.getElementById('status-text').textContent = ok ? '서버 연결됨 ✓' : '연결 실패';
+}
+
+let volTimer;
+function onVolumeChange(v) {
+  document.getElementById('vol-label').textContent = v;
+  clearTimeout(volTimer);
+  volTimer = setTimeout(() => {
+    api('POST', '/api/volume', { level: parseInt(v) }).then(r => {
+      if (r?.ok) toast(`🔊 볼륨 ${v}%`);
+    });
+  }, 400);
+}
+
+function openApp(name) {
+  api('POST', '/api/app/open', { name }).then(r => {
+    if (r?.ok) toast(`📱 ${name} 실행`);
+  });
+}
+
+function sendNotify() {
+  const msg = document.getElementById('notify-msg').value;
+  if (!msg) { toast('⚠️ 알림 내용을 입력하세요'); return; }
+  api('POST', '/api/notify', { title: '아이폰에서 보냄', message: msg }).then(r => {
+    if (r?.ok) toast('🔔 알림 전송됨');
+  });
+}
+
+function speak() {
+  const text = document.getElementById('tts-text').value;
+  if (!text) { toast('⚠️ 텍스트를 입력하세요'); return; }
+  api('POST', '/api/speak', { text }).then(r => {
+    if (r?.ok) toast('🗣 읽는 중...');
+  });
+}
+
+function openUrl() {
+  const url = document.getElementById('url-input').value;
+  if (!url) { toast('⚠️ URL을 입력하세요'); return; }
+  api('POST', '/api/url', { url }).then(r => {
+    if (r?.ok) toast('🌐 열었어요');
+  });
+}
+
+async function loadSystem() {
+  const r = await api('GET', '/api/system');
+  if (!r) return;
+  document.getElementById('sys-battery').textContent = r.battery || '-';
+  document.getElementById('sys-disk').textContent = r.disk || '-';
+  document.getElementById('sys-mem').textContent = r.memory || '-';
+  document.getElementById('sys-uptime').textContent = r.uptime || '-';
+  updateStatus(true);
+}
+
+async function takeScreenshot() {
+  toast('📸 캡처 중...');
+  try {
+    const res = await api('GET', '/api/screenshot');
+    if (res && res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const img = document.getElementById('screenshot-img');
+      img.src = url;
+      img.style.display = 'block';
+      toast('✅ 스크린샷 완료');
+    }
+  } catch { toast('❌ 스크린샷 실패'); }
+}
+
+function confirmAction(action) {
+  const labels = { sleep: '잠자기', restart: '재시작' };
+  if (!confirm(`맥을 ${labels[action]}하시겠어요?`)) return;
+  if (action === 'sleep') {
+    api('POST', '/api/sleep').then(r => { if (r?.ok) toast('😴 잠자기 중...'); });
+  } else if (action === 'restart') {
+    api('POST', '/api/command', { command: 'osascript -e \'tell application "Finder" to restart\'' });
+  }
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// 30초마다 상태 체크
+setInterval(checkConnection, 30000);
+</script>
+</body>
+</html>
