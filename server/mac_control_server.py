@@ -11,8 +11,18 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import io
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 CORS(app)
+
+WEBAPP_PATH = os.path.join(os.path.dirname(__file__), '..', 'webapp', 'index.html')
+
+
+@app.route('/')
+def index():
+    if os.path.exists(WEBAPP_PATH):
+        with open(WEBAPP_PATH, 'r') as f:
+            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return '<h1>Mac Control Server</h1><p>webapp/index.html not found</p>', 200
 
 # 인증 토큰 (.env 파일 또는 환경변수에서 읽기)
 AUTH_TOKEN = os.environ.get("AUTH_TOKEN", "mac-control-secret-2024")
